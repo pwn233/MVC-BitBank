@@ -6,11 +6,6 @@
 package View;
 
 import Control.Control;
-import java.beans.XMLDecoder;
-import java.beans.XMLEncoder;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 /**
  *
@@ -45,11 +40,11 @@ public class View extends javax.swing.JFrame {
         fiat_text = new javax.swing.JLabel();
         Submit = new javax.swing.JButton();
         jComboBox2 = new javax.swing.JComboBox<>();
-        jLabel1 = new javax.swing.JLabel();
-        jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         transLog = new javax.swing.JButton();
+        fs = new javax.swing.JTextField();
+        bs = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -80,10 +75,6 @@ public class View extends javax.swing.JFrame {
 
         jComboBox2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "deposit FIAT", "withdraw FIAT", "buy BITCOIN", "sell BITCOIN" }));
 
-        jLabel1.setText(fiatShow);
-
-        jLabel2.setText((String)bitcoinShow);
-
         jLabel3.setText("rate : 100,000,000 satoshi(fiat) = 1 btc");
 
         jLabel4.setText("minimum trade start at : 1000 satoshi(fiat)");
@@ -94,6 +85,12 @@ public class View extends javax.swing.JFrame {
                 transLogActionPerformed(evt);
             }
         });
+
+        fs.setText(fiatShow);
+        fs.setEditable(false);
+
+        bs.setText(bitcoinShow);
+        bs.setEditable(false);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -123,11 +120,11 @@ public class View extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(fiat_text)
                         .addGap(18, 18, 18)
-                        .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 308, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(fs, javax.swing.GroupLayout.DEFAULT_SIZE, 266, Short.MAX_VALUE)
+                        .addGap(18, 18, 18)
                         .addComponent(bitcoin_text)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 224, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(bs, javax.swing.GroupLayout.PREFERRED_SIZE, 258, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(93, 93, 93))))
             .addGroup(layout.createSequentialGroup()
                 .addGap(362, 362, 362)
@@ -143,8 +140,8 @@ public class View extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(bitcoin_text, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(fiat_text, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel1)
-                    .addComponent(jLabel2))
+                    .addComponent(fs, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(bs, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(40, 40, 40)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(amount_input, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -171,9 +168,8 @@ public class View extends javax.swing.JFrame {
     private void SubmitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SubmitActionPerformed
         // TODO add your handling code here:
         Control c = new Control();
-        String check = "";
         String type;
-        check = amount_input.getText();
+        String check = amount_input.getText();
         //System.out.println(someString+ " "+ amount);
         if(check.equals("")) {
             JOptionPane.showMessageDialog(this,"please fill amount.");
@@ -185,6 +181,7 @@ public class View extends javax.swing.JFrame {
             else
                 type = "BITCOIN";
             JOptionPane.showMessageDialog(this,c.returnStatus(type));
+            new View().setVisible(true);
         }
     }//GEN-LAST:event_SubmitActionPerformed
 
@@ -235,10 +232,10 @@ public class View extends javax.swing.JFrame {
     private javax.swing.JTextField amount_input;
     private javax.swing.JLabel amount_text;
     private javax.swing.JLabel bitcoin_text;
+    private javax.swing.JTextField bs;
     private javax.swing.JLabel fiat_text;
+    private javax.swing.JTextField fs;
     private javax.swing.JComboBox<String> jComboBox2;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JButton transLog;
