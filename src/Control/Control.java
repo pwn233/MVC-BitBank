@@ -7,6 +7,7 @@ package Control;
 
 import Model.Model;
 import javax.swing.JComboBox;
+import javax.swing.table.DefaultTableModel;
 
 /**
  *
@@ -39,5 +40,9 @@ public class Control {
     public String getBitcoin() {
         bitcoin = m.getBitcoin();
         return bitcoin;
+    }
+    public DefaultTableModel showData(DefaultTableModel model) {
+        m.showData(model);
+        return model;
     }
 }

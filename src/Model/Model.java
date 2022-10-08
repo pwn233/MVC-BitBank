@@ -7,6 +7,7 @@ package Model;
 
 import java.sql.ResultSet;
 import javax.swing.JComboBox;
+import javax.swing.table.DefaultTableModel;
 
 /**
  *
@@ -15,51 +16,97 @@ import javax.swing.JComboBox;
 public class Model {
     private double amount;
     private String status;
-    private double accAmount;
+    private double bcAmount;
+    private double fiatAmount;
     private final int adminBBID = 1;
     private String bitcoin;
     private String fiat;
     private String detail;
-    private double beforeAccAmount;
+    private double beforeAcc;
+    private double afterAcc;
     public void makeTrans(double amount, JComboBox JComboBox2) {
         this.amount = amount;
         String func = (String) JComboBox2.getSelectedItem();
+        String type;
+        double x;
         switch (func) {
             case "withdraw FIAT":
                 getFIATAcc();
-                if(accAmount > amount) {
-                    withdraw("FIAT",amount);
+                beforeAcc = fiatAmount;
+                if(fiatAmount >= amount) {
+                    fiatAmount = fiatAmount - amount;
+                    afterAcc = fiatAmount;
+                    detail = "withdraw";
+                    type = "FIAT";
+                    updateACC(type);
+                    transLog(status, type, amount, beforeAcc, afterAcc);
+                } else {
+                    status = "not enough fiat in your balance.";
                 }
                 break;
             case "deposit FIAT":
-                getFIATAcc();
-                deposit("FIAT", amount);
+                if(amount == 0) {
+                    status = "amount can not be zero.";
+                } else {
+                     getFIATAcc();
+                    beforeAcc = fiatAmount;
+                    fiatAmount = fiatAmount + amount;
+                    afterAcc = fiatAmount;
+                    detail = "deposit";
+                    type = "FIAT";
+                    updateACC(type);
+                    transLog(status, type, amount, beforeAcc, afterAcc);
+                } 
                 break;
-            case "withdraw BITCOIN":
-                getBITCOINAcc();
-                if(accAmount > amount) {
-                    withdraw("BITCOIN",amount);
+            case "buy BITCOIN":
+                getFIATAcc();
+                beforeAcc = fiatAmount;
+                x = amount*100000000;
+                if(x <= fiatAmount) {
+                    fiatAmount = fiatAmount - x;
+                    afterAcc = fiatAmount;
+                    detail = "withdraw";
+                    type = "FIAT";
+                    updateACC(type);
+                    transLog(status, type, amount, beforeAcc, afterAcc);
+                    getBITCOINAcc();
+                    beforeAcc = bcAmount;
+                    bcAmount = bcAmount + amount;
+                    afterAcc = bcAmount;
+                    detail = "deposit";
+                    type = "BITCOIN";
+                    updateACC(type);
+                    transLog(status, type, amount, beforeAcc, afterAcc);
+                } else {
+                    status = "not enough fiat in your balance.";
                 }
                 break;
-            case "deposit BITCOIN":
+            case "sell BITCOIN":
                 getBITCOINAcc();
-                deposit("BITCOIN",amount);
+                beforeAcc = bcAmount;
+                if(bcAmount >= amount) {
+                    x = amount*100000000;
+                    bcAmount = bcAmount - amount;
+                    afterAcc = bcAmount;
+                    detail = "withdraw";
+                    type = "BITCOIN";
+                    updateACC(type);
+                    transLog(status, type, amount, beforeAcc, afterAcc);
+                    getFIATAcc();
+                    beforeAcc = fiatAmount;
+                    fiatAmount = fiatAmount + x;
+                    afterAcc = fiatAmount;
+                    detail = "deposit";
+                    type = "FIAT";
+                    updateACC(type);
+                    transLog(status, type, amount, beforeAcc, afterAcc);
+                } {
+                    status = "can not over sell bitcoin on your balance.";
+                }
                 break;
             default:
                 break;
         }
-    }
-    private void withdraw(String type, double amount) {
-        accAmount = accAmount - amount;
-        detail = "withdraw";
-        updateACC(type);
-        transLog(status);
-    }
-    private void deposit(String type, double amount) {
-        accAmount = accAmount + amount;
-        detail = "deposit";
-        updateACC(type);
-        transLog(status);
     }
     private void getFIATAcc() {
         String query ="";
@@ -72,8 +119,7 @@ public class Model {
             if (result) {
                 status = "complete";
                 rs.next();
-                accAmount = rs.getDouble("FIAT");
-                beforeAccAmount = accAmount;
+                fiatAmount = rs.getDouble("FIAT");
             } else {
                 status = "fail {getFIATAcc}";
             }
@@ -93,8 +139,7 @@ public class Model {
                 if (result) {
                     status = "complete";
                     rs.next();
-                    accAmount = rs.getDouble("BITCOIN");
-                    beforeAccAmount = accAmount;
+                    bcAmount = rs.getDouble("BITCOIN");
                 } else {
                     status = "fail {getBITCOINAcc}";
                 }
@@ -108,13 +153,12 @@ public class Model {
         String query ="";
         //query valid check in phpmyadmin already
         if(type.equals("FIAT"))
-            query = String.format("UPDATE ACCOUNT SET FIAT = '%1$f' WHERE BBID = '%2$d'", accAmount, adminBBID);
+            query = String.format("UPDATE ACCOUNT SET FIAT = '%1$f' WHERE BBID = '%2$d'", fiatAmount, adminBBID);
         else
-            query = String.format("UPDATE ACCOUNT SET BITCOIN = '%1$f' WHERE BBID = '%2$d'", accAmount, adminBBID);
+            query = String.format("UPDATE ACCOUNT SET BITCOIN = '%1$f' WHERE BBID = '%2$d'", bcAmount, adminBBID);
         try {
             DBConnect conn = new DBConnect();
             boolean result = conn.execute(query);
-            System.out.println(result);
             if (result) {
                 status = "complete";
             } else {
@@ -171,10 +215,10 @@ public class Model {
         return bitcoin;
     }
 
-    private void transLog(String s) {
+    private void transLog(String s, String type, double amount, double beforeAcc, double afterAcc) {
         String query ="";
         String status ="";
-        query = String.format("INSERT INTO TRANS_LOG(ID, DETAIL, STATUS, BEFORE_ACC, AMOUNT, AFTER_ACC)VALUES(null , '%1$s', '%2$s', '%3$f', '%4$f', '%5$f')", detail, s, beforeAccAmount, amount, accAmount);
+        query = String.format("INSERT INTO TRANS_LOG(ID, DETAIL, STATUS, TYPE, BEFORE_ACC, AMOUNT, AFTER_ACC)VALUES(null , '%1$s', '%2$s','%3$s', '%4$f', '%5$f', '%6$f')", detail, s, type, beforeAcc, amount, afterAcc);
         try {
             DBConnect conn = new DBConnect();
             boolean result = conn.execute(query);
@@ -188,5 +232,28 @@ public class Model {
             status = "Error Update: " + ex;
         }
     }
-    
+    public DefaultTableModel showData(DefaultTableModel model) { 
+        String query;
+        try {
+            DBConnect conn = new DBConnect();
+            query = "SELECT * FROM TRANS_LOG"; 
+            ResultSet rs = conn.getResult(query);
+            while (rs.next()) {
+                String id = Integer.toString(rs.getInt("ID"));
+                String de = rs.getString("DETAIL");
+                String st = rs.getString("STATUS");
+                String ty = rs.getString("TYPE");
+                String be = Double.toString(rs.getDouble("BEFORE_ACC"));
+                String am = Double.toString(rs.getDouble("AMOUNT"));
+                String af = Double.toString(rs.getDouble("AFTER_ACC"));
+                String[] row = {id, de, st, ty, be, am, af};
+                model.addRow(row);
+                // critical variable name, beware of it!
+            }
+            conn.close();
+        } catch (Exception ex) {
+            //sss
+        }
+        return model;
+    }
 }

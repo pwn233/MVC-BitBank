@@ -6,20 +6,26 @@
 package View;
 
 import Control.Control;
-import Model.Model;
+import java.beans.XMLDecoder;
+import java.beans.XMLEncoder;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 /**
  *
  * @author User
  */
 public class View extends javax.swing.JFrame {
-    private String bitcoin;
-    private String fiat;
-    
+    String fiatShow = "";
+    String bitcoinShow = "";
     /**
      * Creates new form View
      */
     public View() {
+        Control c = new Control();
+        bitcoinShow = c.getBitcoin();
+        fiatShow = c.getFiat();
         initComponents();
     }
 
@@ -35,12 +41,15 @@ public class View extends javax.swing.JFrame {
         amount_text = new javax.swing.JLabel();
         amount_input = new javax.swing.JTextField();
         Title1 = new javax.swing.JLabel();
-        bitcoint_text = new javax.swing.JLabel();
+        bitcoin_text = new javax.swing.JLabel();
         fiat_text = new javax.swing.JLabel();
-        bitcoin_display = new javax.swing.JLabel();
-        fiat_display = new javax.swing.JLabel();
         Submit = new javax.swing.JButton();
         jComboBox2 = new javax.swing.JComboBox<>();
+        jLabel1 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+        transLog = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -56,15 +65,11 @@ public class View extends javax.swing.JFrame {
         Title1.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         Title1.setText("Bit Bank");
 
-        bitcoint_text.setFont(new java.awt.Font("Tahoma", 0, 10)); // NOI18N
-        bitcoint_text.setText("BITCOIN");
+        bitcoin_text.setFont(new java.awt.Font("Tahoma", 0, 10)); // NOI18N
+        bitcoin_text.setText("BITCOIN");
 
         fiat_text.setFont(new java.awt.Font("Tahoma", 0, 10)); // NOI18N
         fiat_text.setText("FIAT(USD)");
-
-        bitcoin_display.setText(bitcoin);
-
-        fiat_display.setText(fiat);
 
         Submit.setText("Submit");
         Submit.addActionListener(new java.awt.event.ActionListener() {
@@ -73,7 +78,22 @@ public class View extends javax.swing.JFrame {
             }
         });
 
-        jComboBox2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "deposit FIAT", "withdraw FIAT", "deposit BITCOIN", "withdraw BITCOIN" }));
+        jComboBox2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "deposit FIAT", "withdraw FIAT", "buy BITCOIN", "sell BITCOIN" }));
+
+        jLabel1.setText(fiatShow);
+
+        jLabel2.setText((String)bitcoinShow);
+
+        jLabel3.setText("rate : 100,000,000 satoshi(fiat) = 1 btc");
+
+        jLabel4.setText("minimum trade start at : 1000 satoshi(fiat)");
+
+        transLog.setText("Transaction Log");
+        transLog.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                transLogActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -83,49 +103,62 @@ public class View extends javax.swing.JFrame {
                 .addGap(47, 47, 47)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
+                        .addComponent(amount_text)
+                        .addGap(18, 18, 18)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
-                                .addGap(126, 126, 126)
-                                .addComponent(Title1))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addComponent(amount_text)
-                                .addGap(18, 18, 18)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(jComboBox2, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                     .addComponent(amount_input))
+                                .addGap(93, 93, 93))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(Submit)
                                 .addGap(18, 18, 18)
-                                .addComponent(Submit)))
-                        .addContainerGap())
+                                .addComponent(transLog)
+                                .addGap(28, 28, 28)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel4)
+                                    .addComponent(jLabel3))
+                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(fiat_text)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 308, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(fiat_display, javax.swing.GroupLayout.DEFAULT_SIZE, 79, Short.MAX_VALUE)
-                        .addGap(26, 26, 26)
-                        .addComponent(bitcoint_text)
+                        .addComponent(bitcoin_text)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(bitcoin_display, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(56, 56, 56))))
+                        .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 224, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(93, 93, 93))))
+            .addGroup(layout.createSequentialGroup()
+                .addGap(362, 362, 362)
+                .addComponent(Title1)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(22, 22, 22)
+                .addGap(36, 36, 36)
                 .addComponent(Title1)
-                .addGap(32, 32, 32)
+                .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(bitcoint_text, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(bitcoin_text, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(fiat_text, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(bitcoin_display, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(fiat_display, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jLabel1)
+                    .addComponent(jLabel2))
                 .addGap(40, 40, 40)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(amount_input, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(amount_text, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(Submit)
-                    .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(33, Short.MAX_VALUE))
+                    .addComponent(jLabel3)
+                    .addComponent(transLog))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel4)
+                .addContainerGap(100, Short.MAX_VALUE))
         );
 
         pack();
@@ -137,15 +170,14 @@ public class View extends javax.swing.JFrame {
 
     private void SubmitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SubmitActionPerformed
         // TODO add your handling code here:
+        Control c = new Control();
         String check = "";
-
         String type;
         check = amount_input.getText();
         //System.out.println(someString+ " "+ amount);
         if(check.equals("")) {
             JOptionPane.showMessageDialog(this,"please fill amount.");
         } else {
-            Control c = new Control();
             double amount = Double.parseDouble(check);
             c.getAmount(amount, jComboBox2);
             if(jComboBox2.getSelectedItem().equals("deposit FIAT") || jComboBox2.getSelectedItem().equals("withdraw FIAT"))
@@ -155,6 +187,12 @@ public class View extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this,c.returnStatus(type));
         }
     }//GEN-LAST:event_SubmitActionPerformed
+
+    private void transLogActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_transLogActionPerformed
+        // TODO add your handling code here:
+        Table t = new Table();
+        t.showTable();
+    }//GEN-LAST:event_transLogActionPerformed
 
     /**
      * @param args the command line arguments
@@ -196,10 +234,13 @@ public class View extends javax.swing.JFrame {
     private javax.swing.JLabel Title1;
     private javax.swing.JTextField amount_input;
     private javax.swing.JLabel amount_text;
-    private javax.swing.JLabel bitcoin_display;
-    private javax.swing.JLabel bitcoint_text;
-    private javax.swing.JLabel fiat_display;
+    private javax.swing.JLabel bitcoin_text;
     private javax.swing.JLabel fiat_text;
     private javax.swing.JComboBox<String> jComboBox2;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JButton transLog;
     // End of variables declaration//GEN-END:variables
 }
